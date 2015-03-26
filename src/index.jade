@@ -1,0 +1,242 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
+    title Respectable React Components
+
+    link(rel='stylesheet', type='text/css', href='build/build.css')
+
+  body
+
+    article
+
+      section
+        h1.title
+          span Respectable React Components
+        img(src="images/fitzwilliam-reactable-iii-respectable.png", style="width: 50%")
+
+      section
+        h1.title
+          span Performant React Components
+        img(src="images/fitzwilliam-reactable-iii-performant.png", style="width: 50%")
+
+      section
+        h1 Good news!
+        h2 Many of the ways you can make your React code more performant, actually makes it more maintainable too.
+
+      section(data-bespoke-backdrop='philosoraptor')
+        h1 But I&rsquo;ve heard React is already really performant
+        h2 ...seriously, people go on and on about it.
+
+      section
+        h1 React is very efficient at DOM manipulation
+        h2 But there are other ways to inadvertently slow down your app.
+
+      section
+        h1 React 101: Props
+        h2 The public API of your component
+        pre
+          code.language-javascript.
+            var Hello = React.createClass({
+              render() {
+                return &lt;h1&gt;Hello {this.props.name}&lt;/h1&gt;;
+              }
+            });
+
+            &lt;Hello name="Fitzwilliam Reactable III" /&gt; 
+            // &lt;h1&gt;Hello Fitzwilliam Reactable III&lt;/h1&gt;
+        img(src="images/fitzwilliam-reactable-iii-goodday.png", style="width: 25%")
+
+      section
+        h1 React 101: State
+        h2 The internal ... state ... of your component
+        pre
+          code.language-javascript.
+            update() { this.setState({ checked: true }) }
+
+            render() {
+              return &lt;input checked={this.state.checked} /&gt;;
+            }
+
+        img(src="images/fitzwilliam-reactable-iii-secrets.png", style="width: 25%")
+
+      section
+        h1 Virtual DOM
+        h2  A javascript representation of the DOM output of your components
+        div
+          pre.substep(data-order="1")
+            code.language-javascript.
+              &lt;UserInfo&gt;
+                <span>&lt;UserName name="Fitzwilliam" /&gt;
+              &lt;/UserInfo&gt;
+              // &lt;div&gt; Hello &lt;span&gt;Fitzwilliam&lt;/span&gt; &lt;/div&gt;
+
+          pre.substep(data-order="2")
+            code.language-javascript.
+              &lt;UserInfo&gt;
+                <span>&lt;UserName name="FitzFromTheBlock" /&gt;
+              &lt;/UserInfo&gt;
+              // &lt;div&gt; Hello &lt;span&gt;FitzFromTheBlock&lt;/span&gt; &lt;/div&gt;
+
+      section
+        h1 Virtual DOM
+        ul
+          li When updates happen, React's virtual DOM can determine the changes by diffing the original DOM with the re-computed one.
+          li Once the differences are established, React can update the browser DOM as efficiently as possible.
+          li ~*~*~*~ performance ~*~*~*~
+
+
+      section
+        h1 But remember
+        h2 Every time you update a component you’re re-computing that component inside React. Critically, you’re also re-computing its children, and grandchildren, and so on.
+
+
+      section(data-bespoke-backdrop='should')
+        h1.case-sensitive shouldComponentUpdate( )
+
+      section
+        pre
+          code.language-javascript.
+            shouldComponentUpdate(nextProps, nextState) {
+              return duh;
+            }
+
+      section
+        h1 By default
+        pre
+          code.language-javascript.
+            shouldComponentUpdate(nextProps, nextState) {
+              return true;
+            } 
+
+      section(data-bespoke-backdrop='tree')
+
+      section
+        h1 So, basically
+        h2 shouldComponentUpdate helps you avoid computing your render tree when you don't need to
+        img(src="images/fitzwilliam-reactable-iii-yay.png", style="width: 50%")
+
+      section
+        h1.case-sensitive PureRenderMixin
+        h2 How to use it
+        pre
+          code.language-javascript.
+            var PureRenderMixin = React.addons.PureRenderMixin;
+
+            var Heading = React.createClass({
+              mixins: [PureRenderMixin],
+              render() {
+                return &lt;h1&gt;{this.props.text}&lt;/h1&gt;;
+              }
+            });
+
+      section
+        h1.case-sensitive PureRenderMixin
+        h2 What it actually does
+        pre
+          code.language-javascript.
+            var ReactComponentWithPureRenderMixin = {
+              shouldComponentUpdate: function(nextProps, nextState) {
+                return !shallowEqual(this.props, nextProps) ||
+                       !shallowEqual(this.state, nextState);
+              }
+            };
+
+      section
+        h1.case-sensitive PureRenderMixin isn't the catchall you're looking for
+        h2 There are non-comparable values that defeat it. For example:
+        ul
+          li 
+            code this.props.children
+          li Functions where a new reference is passed each time
+            br
+            code &lt;Foo something={e =&gt; dosomething()} /&gt;
+            br
+            code &lt;Foo onClick={this.blah.bind(this)} /&gt;
+
+      section(data-bespoke-backdrop='immutable')
+        h1 
+          strong Immutable Data
+
+      section
+        h1 Immutable data gives you confidence
+        h2 If values change you always get a new reference.
+
+      section
+        h1.title
+          span Performance Tools
+
+      section
+        h1 React.addons.Perf
+        pre
+          code.language-javascript.
+            var Perf = React.addons.Perf;
+
+            Perf.start();
+            React.render( &lt;MyApp /&gt;, element );
+            Perf.stop();
+
+            Perf.printInclusive(); // Prints the overall time taken.
+            Perf.printExclusive(); // Time excluding mounting
+            Perf.printWasted();    // Time spent on components that
+                                   // didn't render anything
+      section
+        h1 Detect wasted time
+        h2 Run 
+          code.language-javascript. Perf.start()
+          |  from the console, interact with your app, and then run 
+          code.language-javascript. Perf.stop(); Perf.printWasted()
+
+        p &nbsp;
+        img(src="images/perf-wasted.png", style="width: 70%")
+        p &nbsp;
+        
+      section
+        h1 React Render Visualizer 
+        h3 
+          a(href="https://github.com/redsunsoft/react-render-visualizer") github.com/redsunsoft/react-render-visualizer
+        img(src="images/react-render-visializer.gif", style="width: 50%; height: auto")
+
+
+      section.invert(data-bespoke-backdrop="fdt")
+        img(src="images/fdt_logo.png", style="width: 50%")
+        h3 Facebook's first open source React component
+
+      section(data-bespoke-backdrop="fdt-lies")
+        h1 NOT A REAL SCROLLBAR
+        h2 Loads in only the rows currently in the viewport, and a buffer to ease scrolling. Then update state of visible rows when the scroll event fires.
+
+      section
+        h1 Consider only rendering what the user can see
+
+      section
+        h1 To sum up
+        ul
+          li shouldComponentUpdate? Ideally not.
+          li PureRenderMixin is pretty great
+          li Immutable Data will make your life better
+          li Performance tools are your friend
+          li Only render what you need to (level 80)
+          li But also&hellip;
+          li How you stucture and compose your components will
+            br
+            | have a big imapct on how it performs
+
+      section.invert(data-bespoke-backdrop="conf")
+        div.bg
+          h1 Jason Bonta did a talk on this which is better.
+          h2 
+            a(href="http://conf.reactjs.com/schedule.html#making-your-app-fast-with-high-performance-components")
+              | You should watch it
+
+      section
+        img(src="images/fitzwilliam-reactable-iii-thanks.png", style="width: 65%")
+        h2.no-border twitter: 
+          a(href="https://twitter.com/kelle_c") kelle_c
+        h2.no-border github: 
+          a(href="https://github.com/kellec") kellec
+        h3 Special thanks to Cam, Pieter, &amp; Kat for the help and advice &lt;3
+
+
+    script(src='build/build.js')
